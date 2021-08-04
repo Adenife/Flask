@@ -1,0 +1,108 @@
+# PART 1
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
+
+movies = [
+    {
+        "name": "The Shawshank Redemption",
+        "casts": ["Tim Robbins", "Morgan Freeman", "Bob Gunton", "William Sadler"],
+        "genres": ["Drama"]
+    },
+    {
+       "name": "The Godfather ",
+       "casts": ["Marlon Brando", "Al Pacino", "James Caan", "Diane Keaton"],
+       "genres": ["Crime", "Drama"]
+    }
+]
+
+
+# endpoint to display all movies
+@app.route("/display")
+def display():
+    # return {"hello": "world"}
+    return jsonify(movies)
+
+
+# endpoint to add movie
+@app.route("/add", methods=["POST"])
+def add():
+    movie = request.get_json()
+    movies.append(movie)
+    return {"id": len(movies)}, 200
+
+
+# endpoint to update movie
+@app.route("/update/<int:index>", methods=["PUT"])
+def update_movie(index):
+    movie = request.get_json()
+    movies[index] = movie
+    return jsonify(movies[index]), 200
+
+
+# endpoint to delete movie
+@app.route("/delete/<int:index>", methods=["DELETE"])
+def delete_movie(index):
+    movies.pop(index)
+    return 'None', 200
+
+
+
+
+
+# PART 2
+from flask import Flask, request, Response
+from database.db import initialize_db
+from database.models import Movie
+
+app = Flask(__name__)
+
+# configure your database
+app.config['MONGODB_SETTINGS'] = {
+    'host': 'mongodb://localhost/movie-bag'
+}
+
+# initialize your database
+initialize_db(app)
+
+
+# endpoint to display all movies
+@app.route("/display")
+def display():
+    movies = Movie.objects.to_json()
+    return Response(movies, mimetype="application/json", status=200)
+
+
+# endpoint to add movie
+@app.route("/add", methods=["POST"])
+def add():
+    body = request.get_json()
+    movie = Movie(**body).save()
+    id = movie.id
+    return {"id": str(id)}, 200
+
+
+# endpoint to update movie
+@app.route("/update/<id>", methods=["PUT"])
+def update_movie(id):
+    body = request.get_json()
+    Movie.objects.get(id=id).update(**body)
+    return '', 200
+
+
+# endpoint to delete movie
+@app.route("/delete/<id>", methods=["DELETE"])
+def delete_movie(id):
+    Movie.objects.get(id=id).delete()
+    return '', 200
+
+
+# endpoint to get a particular movie
+@app.route("/get_one/<id>", methods=["GET"])
+def get_one(id):
+    movie = Movie.objects.get(id=id).to_json()
+    return Response(movie, mimetype="application/json", status=200)
+
+if __name__ == '__main__':
+    app.run(debug=True)
