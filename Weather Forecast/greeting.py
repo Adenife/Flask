@@ -45,6 +45,7 @@ def get_temperature(lat, lon, timezone):
     url_base = 'https://api.met.no/weatherapi/locationforecast/2.0/compact'
 
     response = requests.get(url_base, params={'lat': lat, 'lon': lon})
+    print(response)
     data = response.json()['properties']['timeseries']
 
     times = [entry['time'] for entry in data]

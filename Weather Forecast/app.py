@@ -1,6 +1,6 @@
 import os
 from flask import Flask, request, render_template
-from weather_app.greeting import greet, get_local_IP_address
+from greeting import greet, get_local_IP_address
 
 app = Flask(__name__)
 DEPLOY = os.environ.get('DEPLOY')

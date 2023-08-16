@@ -1,0 +1,6 @@
+pandas
+requests-cache
+wikipedia
+plotly
+requests
+flask
